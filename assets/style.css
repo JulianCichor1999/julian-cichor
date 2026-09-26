@@ -397,7 +397,7 @@ h1 .surname {
 }
 .timeline-item {
   position: relative;
-  display: grid;
+  display: flex;
   grid-template-columns: 155px 1fr;
   gap: 28px;
   padding: 0 0 40px;
