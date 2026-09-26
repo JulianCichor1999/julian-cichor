@@ -398,7 +398,7 @@ h1 .surname {
 .timeline-item {
   position: relative;
   display: flex;
-  grid-template-columns: 155px 1fr;
+  align-items: flex-start;
   gap: 28px;
   padding: 0 0 40px;
 }
@@ -414,9 +414,24 @@ h1 .surname {
   content: "";
 }
 .timeline-label {
+  flex: 0 0 155px;
   font-size: 14px;
   color: var(--blue);
   font-weight: 600;
+}
+.timeline-content {
+  flex: 1;
+  min-width: 0;
+}
+.timeline-logo {
+  flex: 0 0 80px;
+}
+.timeline-logo img {
+  display: block;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 4px;
 }
 .timeline-item h3 {
   font-size: 20px;
@@ -516,8 +531,15 @@ footer {
     grid-column: 2;
   }
   .timeline-item {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     gap: 6px;
+  }
+  .timeline-label,
+  .timeline-logo {
+    flex-basis: auto;
+  }
+  .timeline-logo {
+    margin-top: 12px;
   }
 }
 @media (max-width: 540px) {
@@ -616,4 +638,3 @@ footer {
     transition: none !important;
   }
 }
-
