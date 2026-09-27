@@ -16,13 +16,16 @@
     <header>
       <nav class="wrap" aria-label="Nawigacja główna">
         <a class="brand" href="#main">Julian Cichor</a>
-        <div class="nav-links">
+        <button class="nav-toggle" type="button" aria-label="Otwórz menu" aria-controls="nav-links" aria-expanded="false" title="Menu">
+          <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+          <svg class="close-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
+        </button>
+        <div class="nav-links" id="nav-links">
           <a href="#o-mnie">O mnie</a>
           <a href="#kompetencje">Kompetencje i obszary rozwoju</a>
           <a href="#transport">Transport publiczny</a>
           <a href="#projekty">Wybrane projekty</a>
           <a href="#doswiadczenie">Doświadczenie i edukacja</a>
-          <a href="#transport">Transport</a>
           <a href="#kontakt" class="nav-contact">Napisz do mnie</a>
         </div>
       </nav>
@@ -326,6 +329,41 @@
     </footer>
     <script>
       document.getElementById("year").textContent = new Date().getFullYear();
+
+      const nav = document.querySelector("header nav");
+      const navToggle = document.querySelector(".nav-toggle");
+      const navLinks = document.getElementById("nav-links");
+      const compactNav = window.matchMedia("(max-width: 1100px)");
+
+      function closeMenu() {
+        navToggle.setAttribute("aria-expanded", "false");
+        navToggle.setAttribute("aria-label", "Otwórz menu");
+        navLinks.classList.remove("is-open");
+      }
+
+      navToggle.addEventListener("click", () => {
+        const open = navToggle.getAttribute("aria-expanded") !== "true";
+        navToggle.setAttribute("aria-expanded", String(open));
+        navToggle.setAttribute("aria-label", open ? "Zamknij menu" : "Otwórz menu");
+        navLinks.classList.toggle("is-open", open);
+      });
+
+      navLinks.addEventListener("click", (event) => {
+        if (event.target.closest("a")) closeMenu();
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!nav.contains(event.target)) closeMenu();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && navToggle.getAttribute("aria-expanded") === "true") {
+          closeMenu();
+          navToggle.focus();
+        }
+      });
+
+      compactNav.addEventListener("change", closeMenu);
     </script>
   </body>
 </html>
