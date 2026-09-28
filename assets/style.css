@@ -155,9 +155,6 @@ h1 {
 h1 span {
   display: block;
 }
-h1 .surname {
-  color: #85858b;
-}
 .hero-copy {
   max-width: 635px;
   margin: 24px auto;
@@ -205,14 +202,6 @@ h1 .surname {
   border-top: 1.5px solid currentColor;
   transform: rotate(45deg);
 }
-.signature {
-  position: absolute;
-  bottom: 18px;
-  left: 0;
-  right: 0;
-  color: var(--muted);
-  font-size: 12px;
-}
 .section {
   padding-block: 100px;
 }
@@ -236,10 +225,6 @@ h1 .surname {
 }
 .section-copy p {
   margin: 0 0 18px;
-}
-.section-copy strong {
-  color: var(--ink);
-  font-weight: 550;
 }
 .work-photo {
   margin: 52px 0 0;
@@ -278,86 +263,6 @@ h1 .surname {
 .transport > .section-copy {
   max-width: 760px;
   margin-top: 24px;
-}
-.transport-ai {
-  max-width: 760px;
-  margin-top: 64px;
-}
-.transport-ai .section-copy {
-  margin-top: 24px;
-}
-
-.route-map {
-  position: relative;
-  min-height: 310px;
-  overflow: hidden;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #edf5ff, #d9e9ff);
-}
-.route-map:before,
-.route-map:after {
-  position: absolute;
-  height: 4px;
-  border-radius: 4px;
-  background: var(--blue);
-  content: "";
-}
-.route-map:before {
-  width: 85%;
-  top: 120px;
-  left: -10%;
-  transform: rotate(15deg);
-}
-.route-map:after {
-  width: 72%;
-  top: 210px;
-  right: -10%;
-  background: #1d1d1f;
-  transform: rotate(-22deg);
-}
-.station {
-  position: absolute;
-  z-index: 1;
-  width: 20px;
-  height: 20px;
-  border: 5px solid white;
-  border-radius: 50%;
-  background: var(--blue);
-  box-shadow: 0 0 0 1px var(--blue);
-}
-.station-a {
-  top: 96px;
-  left: 19%;
-}
-.station-b {
-  top: 170px;
-  left: 48%;
-  width: 28px;
-  height: 28px;
-  background: #1d1d1f;
-}
-.station-c {
-  right: 20%;
-  bottom: 74px;
-}
-.map-label {
-  position: absolute;
-  z-index: 2;
-  color: #3d566e;
-  font-size: 12px;
-  font-weight: 600;
-}
-.label-a {
-  top: 62px;
-  left: 10%;
-}
-.label-b {
-  top: 210px;
-  left: 43%;
-}
-.label-c {
-  right: 8%;
-  bottom: 45px;
 }
 .tags {
   display: flex;
@@ -578,10 +483,6 @@ footer {
   h1 {
     font-size: 68px;
   }
-  .section-intro,
-  .transport {
-    gap: 40px;
-  }
   .section h2 {
     font-size: 40px;
   }
@@ -634,14 +535,6 @@ footer {
   .section {
     padding-block: 64px;
   }
-  .transport-ai {
-    margin-top: 48px;
-  }
-  .section-intro,
-  .transport {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
   .section h2 {
     font-size: 38px;
   }
@@ -651,9 +544,6 @@ footer {
   .cards {
     grid-template-columns: 1fr;
     margin-top: 28px;
-  }
-  .route-map {
-    min-height: 250px;
   }
   .project {
     gap: 14px;
