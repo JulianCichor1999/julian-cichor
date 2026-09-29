@@ -5,7 +5,7 @@ Prywatna strona wizytówkowa Juliana Cichora, poświęcona marketingowi internet
 ## Zawartość
 
 - `index.html` — główna strona wizytówki
-- `assets/` — zdjęcia użyte na stronie
+- `assets/` — zdjęcia oraz arkusz stylów użyte na stronie
 
 ## Uruchomienie
 
