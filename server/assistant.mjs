@@ -30,7 +30,7 @@ const fail = (status, message) => {
 };
 const configured = (env) =>
   Boolean(
-    env.GEMINI_API_KEY && env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY,
+    env.OPENROUTER_API_KEY && env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY,
   );
 
 async function limitedBody(request, maximum) {
@@ -111,8 +111,8 @@ function messagesFrom(body) {
       );
     }
     return {
-      role: role === "assistant" ? "model" : "user",
-      parts: [{ text: message.content.trim() }],
+      role,
+      content: message.content.trim(),
     };
   });
 }
@@ -131,27 +131,19 @@ async function chat(request, env, fetcher) {
   }
   const contents = messagesFrom(body);
   await verify(request, env, body.token, "chat", fetcher);
-  const model = env.GEMINI_MODEL || "gemini-3.8-flash";
-  if (!/^[a-zA-Z0-9.-]+$/.test(model))
-    fail(503, "Asystent wymaga konfiguracji.");
   const response = await fetcher(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    "https://openrouter.ai/api/v1/chat/completions",
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": env.GEMINI_API_KEY,
+        Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
       },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemInstruction }] },
-        contents,
-        generationConfig: {
-          maxOutputTokens: 1600,
-          temperature: 0.4,
-          ...(model.startsWith("gemini-3")
-            ? { thinkingConfig: { thinkingLevel: "low" } }
-            : {}),
-        },
+        model: "recursive/flint-v1.0:free",
+        messages: [{ role: "system", content: systemInstruction }, ...contents],
+        max_tokens: 1600,
+        temperature: 0.4,
       }),
       signal: AbortSignal.timeout(30000),
     },
@@ -165,13 +157,11 @@ async function chat(request, env, fetcher) {
     );
   }
   const data = await response.json();
-  const candidate = data.candidates?.[0];
-  const answer = candidate?.content?.parts
-    ?.filter((part) => !part.thought && typeof part.text === "string")
-    .map((part) => part.text)
-    .join("\n")
-    .trim();
-  if (!answer || !["STOP", "MAX_TOKENS"].includes(candidate.finishReason)) {
+  const candidate = data.choices?.[0];
+  const answer = typeof candidate?.message?.content === "string"
+    ? candidate.message.content.trim()
+    : "";
+  if (!answer || !["stop", "length"].includes(candidate.finish_reason)) {
     fail(
       502,
       "Nie udało się przygotować odpowiedzi. Zadaj pytanie inaczej lub napisz do Juliana.",
