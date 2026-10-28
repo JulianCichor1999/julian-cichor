@@ -143,7 +143,6 @@ async function chat(request, env, fetcher) {
         model: "recursive/flint-v1.0:free",
         messages: [{ role: "system", content: systemInstruction }, ...contents],
         max_tokens: 1600,
-        reasoning: { enabled: false },
         temperature: 0.4,
       }),
       signal: AbortSignal.timeout(90000),
