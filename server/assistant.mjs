@@ -145,7 +145,7 @@ async function chat(request, env, fetcher) {
         max_tokens: 1600,
         temperature: 0.4,
       }),
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(90000),
     },
   );
   if (!response.ok) {
