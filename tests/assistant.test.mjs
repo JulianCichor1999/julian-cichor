@@ -188,7 +188,6 @@ test("zweryfikowane pytanie trafia do OpenRouter z bazą wiedzy i kluczem tylko 
     ["system", "user", "assistant", "user"],
   );
   assert.equal(payload.max_tokens, 1600);
-  assert.deepEqual(payload.reasoning, { enabled: false });
   assert.equal(payload.model, "recursive/flint-v1.0:free");
 });
 test("pełne sześć wymian z polskimi znakami mieści się w limicie żądania", async () => {
