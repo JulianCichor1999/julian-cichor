@@ -109,7 +109,7 @@
   async function request(path, options = {}) {
     const response = await fetch(path, {
       ...options,
-      signal: AbortSignal.timeout(45000),
+      signal: AbortSignal.timeout(105000),
     });
     let data;
     try {
@@ -299,7 +299,7 @@
       say("");
     } catch (error) {
       pending.remove();
-      say(`Nie wysłano pytania. ${error.message}`);
+      say(error.name === "TimeoutError" ? "Odpowiedź trwa zbyt długo. Spróbuj ponownie lub napisz do Juliana." : `Nie wysłano pytania. ${error.message}`);
     } finally {
       setBusy(false);
       if (!panel.hidden) input.focus();
