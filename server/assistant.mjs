@@ -171,7 +171,7 @@ async function chat(request, env, fetcher) {
   // Nie przedstawiaj urwanej odpowiedzi jako kompletnej.
   if (candidate.finish_reason === "length" || answer.length > 5900) {
     const bounded = answer.slice(0, 5800);
-    const endings = [...bounded.matchAll(/[.!?](?=\\s|$)/gu)];
+    const endings = [...bounded.matchAll(/[.!?](?=\s|$)/gu)];
     const last = endings.at(-1);
     if (!last) {
       fail(502, "Nie udało się dokończyć odpowiedzi. Spróbuj krótszego pytania lub napisz do Juliana.");
