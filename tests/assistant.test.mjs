@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { handle } from "../server/assistant.mjs";
 
 const env = {
-  GEMINI_API_KEY: "private-gemini",
+  OPENROUTER_API_KEY: "private-openrouter",
   GROQ_API_KEY: "private-groq",
   TURNSTILE_SITE_KEY: "public-site-key",
   TURNSTILE_SECRET_KEY: "private-turnstile",
@@ -32,12 +32,7 @@ const verified = (action) => ({
   action,
 });
 const answer = {
-  candidates: [
-    {
-      finishReason: "STOP",
-      content: { parts: [{ text: "Julian rozwija automatyzacje w n8n." }] },
-    },
-  ],
+  choices: [{ finish_reason: "stop", message: { content: "Julian rozwija automatyzacje w n8n." } }],
 };
 const never = () => {
   assert.fail("Dostawca nie powinien być wywołany.");
@@ -158,7 +153,7 @@ test("Turnstile odrzuca fałszywy token, inną domenę i inną akcję", async ()
     403,
   );
 });
-test("zweryfikowane pytanie trafia do Gemini z bazą wiedzy i kluczem tylko w nagłówku", async () => {
+test("zweryfikowane pytanie trafia do OpenRouter z bazą wiedzy i kluczem tylko w nagłówku", async () => {
   const calls = [];
   const response = await handle(
     makeRequest({
@@ -180,19 +175,20 @@ test("zweryfikowane pytanie trafia do Gemini z bazą wiedzy i kluczem tylko w na
     answer: "Julian rozwija automatyzacje w n8n.",
   });
   const { url, options } = calls[1];
-  assert.match(url, /gemini-3\.8-flash:generateContent$/);
-  assert.ok(!url.includes(env.GEMINI_API_KEY));
-  assert.equal(options.headers["x-goog-api-key"], env.GEMINI_API_KEY);
+  assert.equal(url, "https://openrouter.ai/api/v1/chat/completions");
+  assert.ok(!url.includes(env.OPENROUTER_API_KEY));
+  assert.equal(options.headers.Authorization, `Bearer ${env.OPENROUTER_API_KEY}`);
   const payload = JSON.parse(options.body);
   assert.match(
-    payload.systemInstruction.parts[0].text,
+    payload.messages[0].content,
     /julian.cichor@aol.com/,
   );
   assert.deepEqual(
-    payload.contents.map((message) => message.role),
-    ["user", "model", "user"],
+    payload.messages.map((message) => message.role),
+    ["system", "user", "assistant", "user"],
   );
-  assert.equal(payload.generationConfig.maxOutputTokens, 1600);
+  assert.equal(payload.max_tokens, 1600);
+  assert.equal(payload.model, "recursive/flint-v1.0:free");
 });
 test("pełne sześć wymian z polskimi znakami mieści się w limicie żądania", async () => {
   const messages = Array.from({ length: 13 }, (_, index) => ({
@@ -215,14 +211,14 @@ test("błąd i blokada dostawcy nie ujawniają surowej odpowiedzi ani klucza", a
     const response = await handle(makeRequest(), env, async () =>
       ++count === 1
         ? ok(verified("chat"))
-        : new Response("private-gemini technical provider error", { status }),
+        : new Response("private-openrouter technical provider error", { status }),
     );
     assert.equal(response.status, status === 429 ? 429 : 502);
-    assert.ok(!(await response.text()).includes("private-gemini"));
+    assert.ok(!(await response.text()).includes("private-openrouter"));
   }
 });
-test("brak odpowiedzi i zablokowana odpowiedź Gemini dają czytelny błąd", async () => {
-  for (const result of [{}, { candidates: [{ finishReason: "SAFETY" }] }]) {
+test("brak odpowiedzi i zablokowana odpowiedź OpenRouter dają czytelny błąd", async () => {
+  for (const result of [{}, { choices: [{ finish_reason: "content_filter" }] }]) {
     let count = 0;
     assert.equal(
       (
@@ -254,7 +250,7 @@ function audioRequest(
     body: form,
   });
 }
-test("audio trafia do Groq i wraca jako tekst bez automatycznego pytania do Gemini", async () => {
+test("audio trafia do Groq i wraca jako tekst bez automatycznego pytania do OpenRouter", async () => {
   let count = 0;
   const response = await handle(audioRequest(), env, async (url, options) => {
     if (++count === 1) return ok(verified("transcribe"));
