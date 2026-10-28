@@ -4,7 +4,8 @@
   "description": "Prywatna strona wizytówkowa Juliana Cichora, poświęcona marketingowi internetowemu.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs"
   },
   "repository": {
     "type": "git",
