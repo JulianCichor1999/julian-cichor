@@ -1,0 +1,269 @@
+.jc-assistant {
+  --chat-gap: 16px;
+  --chat-edge: 24px;
+  --chat-radius: 12px;
+  --chat-input-radius: 8px;
+  --chat-width: 400px;
+  --chat-height: 680px;
+  --chat-control: 44px;
+  --chat-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  position: fixed;
+  bottom: max(var(--chat-edge), env(safe-area-inset-bottom));
+  right: max(var(--chat-edge), env(safe-area-inset-right));
+  z-index: 20;
+  font: 16px/1.5 var(--font);
+  color: var(--ink);
+  text-align: left;
+}
+.jc-assistant [hidden] {
+  display: none !important;
+}
+.jc-assistant button,
+.jc-assistant textarea {
+  font: inherit;
+}
+.jc-assistant button {
+  cursor: pointer;
+}
+.jc-assistant button:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+.jc-assistant :is(button, a, textarea, summary):focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+.jc-assistant .jc-launch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 12px 20px;
+  border: 1px solid var(--blue);
+  border-radius: 999px;
+  background: var(--blue);
+  color: var(--paper);
+  box-shadow: var(--chat-shadow);
+  font-weight: 600;
+}
+.jc-assistant svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+.jc-assistant .jc-panel {
+  position: absolute;
+  right: 0;
+  bottom: 68px;
+  display: flex;
+  flex-direction: column;
+  width: min(var(--chat-width), calc(100vw - 2 * var(--chat-edge)));
+  height: min(var(--chat-height), calc(100dvh - 116px));
+  border: 1px solid var(--line);
+  border-radius: var(--chat-radius);
+  background: var(--paper);
+  box-shadow: var(--chat-shadow);
+  overflow: hidden;
+}
+.jc-assistant .jc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.jc-assistant .jc-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+.jc-assistant .jc-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.jc-assistant .jc-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--chat-control);
+  min-height: var(--chat-control);
+  border: 1px solid transparent;
+  border-radius: var(--chat-input-radius);
+  background: transparent;
+  color: var(--ink);
+}
+.jc-assistant .jc-icon:hover,
+.jc-assistant .jc-clear:hover {
+  background: var(--surface);
+}
+.jc-assistant .jc-log {
+  flex: 1;
+  min-height: 64px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px 16px 8px;
+}
+.jc-assistant .jc-message {
+  width: fit-content;
+  max-width: 95%;
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-radius: var(--chat-radius);
+  background: var(--surface);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.jc-assistant .jc-message[data-role="user"] {
+  margin-left: auto;
+  background: var(--blue);
+  color: var(--paper);
+}
+.jc-assistant .jc-message strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+.jc-assistant .jc-starters {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.jc-assistant .jc-starters button {
+  min-height: var(--chat-control);
+  padding: 8px 12px;
+  text-align: left;
+  color: var(--blue);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--chat-input-radius);
+  font-size: 14px;
+}
+.jc-assistant .jc-starters button:hover {
+  border-color: var(--blue);
+}
+.jc-assistant .jc-status {
+  margin: 0;
+  padding: 0 16px 8px;
+  font-size: 13px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.jc-assistant .jc-status:empty {
+  padding-bottom: 0;
+}
+.jc-assistant .jc-form {
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+}
+.jc-assistant .jc-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.jc-assistant textarea {
+  display: block;
+  width: 100%;
+  min-height: 76px;
+  max-height: 160px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--chat-input-radius);
+  color: var(--ink);
+  background: var(--paper);
+}
+.jc-assistant textarea::placeholder {
+  color: var(--muted);
+}
+.jc-assistant .jc-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+.jc-assistant .jc-send {
+  min-height: var(--chat-control);
+  padding: 8px 20px;
+  border: 1px solid var(--blue);
+  border-radius: 999px;
+  background: var(--blue);
+  color: var(--paper);
+  font-weight: 600;
+}
+.jc-assistant .jc-mic {
+  gap: 8px;
+  padding: 8px 12px;
+  border-color: var(--line);
+  font-size: 14px;
+}
+.jc-assistant .jc-mic[aria-pressed="true"] {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: var(--surface);
+}
+.jc-assistant .jc-footer {
+  padding: 0 16px 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.jc-assistant .jc-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.jc-assistant .jc-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--chat-control);
+  color: var(--blue);
+  text-decoration: underline;
+}
+.jc-assistant .jc-clear {
+  min-height: var(--chat-control);
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+}
+.jc-assistant summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--chat-control);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.jc-assistant details p {
+  margin: 0 0 8px;
+}
+.jc-assistant .jc-privacy-copy {
+  max-height: 116px;
+  overflow-y: auto;
+}
+.jc-assistant .jc-verification {
+  padding: 0 16px;
+}
+@media (max-width: 480px) {
+  .jc-assistant {
+    --chat-edge: 12px;
+  }
+  .jc-assistant .jc-panel {
+    bottom: 64px;
+    height: min(var(--chat-height), calc(100dvh - 100px));
+  }
+  .jc-assistant:has(.jc-panel:not([hidden])) .jc-launch {
+    min-height: var(--chat-control);
+    padding-block: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jc-assistant * {
+    scroll-behavior: auto;
+  }
+}
