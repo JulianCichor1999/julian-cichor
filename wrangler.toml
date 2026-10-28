@@ -1,3 +1,7 @@
 name = "julian-cichor"
 pages_build_output_dir = "./dist"
 compatibility_date = "2026-10-28"
+
+# Public widget key; private API keys remain encrypted in Pages settings.
+[vars]
+TURNSTILE_SITE_KEY = "0x4AAAAAAFpzE4D95eNVmxKM"
