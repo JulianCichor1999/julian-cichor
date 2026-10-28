@@ -188,6 +188,7 @@ test("zweryfikowane pytanie trafia do OpenRouter z bazą wiedzy i kluczem tylko 
     ["system", "user", "assistant", "user"],
   );
   assert.equal(payload.max_tokens, 1600);
+  assert.deepEqual(payload.reasoning, { enabled: false });
   assert.equal(payload.model, "recursive/flint-v1.0:free");
 });
 test("pełne sześć wymian z polskimi znakami mieści się w limicie żądania", async () => {
@@ -295,4 +296,18 @@ test("pusty i za długi wynik transkrypcji nie nadpisze pola pytania", async () 
     );
     assert.equal(response.status, 422);
   }
+});
+
+test("ucięta odpowiedź kończy się pełnym zdaniem i informacją o skróceniu", async () => {
+  let count = 0;
+  const result = { choices: [{ finish_reason: "length", message: { content: "Julian pomaga w automatyzacji. Skontaktuj się z Jul" } }] };
+  const response = await handle(makeRequest(), env, async () => ok(++count === 1 ? verified("chat") : result));
+  assert.deepEqual(await response.json(), { answer: "Julian pomaga w automatyzacji.\n\nOdpowiedź została skrócona. Możesz dopytać o szczegóły." });
+});
+
+test("brak całego zdania po ucięciu nie jest prezentowany jako gotowa odpowiedź", async () => {
+  let count = 0;
+  const result = { choices: [{ finish_reason: "length", message: { content: "Julian może po" } }] };
+  const response = await handle(makeRequest(), env, async () => ok(++count === 1 ? verified("chat") : result));
+  assert.equal(response.status, 502);
 });
