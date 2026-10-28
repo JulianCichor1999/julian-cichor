@@ -167,7 +167,17 @@ async function chat(request, env, fetcher) {
       "Nie udało się przygotować odpowiedzi. Zadaj pytanie inaczej lub napisz do Juliana.",
     );
   }
-  return json({ answer: answer.slice(0, 6000) });
+  // Nie przedstawiaj urwanej odpowiedzi jako kompletnej.
+  if (candidate.finish_reason === "length" || answer.length > 5900) {
+    const bounded = answer.slice(0, 5800);
+    const endings = [...bounded.matchAll(/[.!?](?=\s|$)/gu)];
+    const last = endings.at(-1);
+    if (!last) {
+      fail(502, "Nie udało się dokończyć odpowiedzi. Spróbuj krótszego pytania lub napisz do Juliana.");
+    }
+    return json({ answer: bounded.slice(0, last.index + 1) + "\n\nOdpowiedź została skrócona. Możesz dopytać o szczegóły." });
+  }
+  return json({ answer });
 }
 
 async function transcribe(request, env, fetcher) {
