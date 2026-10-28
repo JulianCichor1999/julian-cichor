@@ -26,7 +26,7 @@
       </form>
       <div class="jc-footer">
         <div class="jc-footer-row"><a href="mailto:julian.cichor@aol.com">Napisz do Juliana</a><button type="button" class="jc-clear">Nowa rozmowa</button></div>
-        <details><summary>Jak działa rozmowa?</summary><div class="jc-privacy-copy" id="jc-help"><p>Odpowiada AI na podstawie informacji o Julianie. Może się pomylić. Zakres i wycenę potwierdza Julian.</p><p>Wiadomości i ostatnie 6 wymian trafiają przez Cloudflare do Google Gemini. Nagranie (do 60 s) po zatrzymaniu trafia do Groq. Rozpoznany tekst możesz poprawić i samodzielnie wysłać. Nie podawaj danych poufnych.</p><p>Ta aplikacja nie zapisuje rozmów ani nagrań w bazie lub pamięci przeglądarki. Historia znika po odświeżeniu lub kliknięciu „Nowa rozmowa”. Cloudflare Turnstile weryfikuje ruch przed wysłaniem.</p></div></details>
+        <details><summary>Jak działa rozmowa?</summary><div class="jc-privacy-copy" id="jc-help"><p>Odpowiada AI na podstawie informacji o Julianie. Może się pomylić. Zakres i wycenę potwierdza Julian.</p><p>Wiadomości i ostatnie 6 wymian trafiają przez Cloudflare do OpenRouter i dostawcy modelu Recursive. Nagranie (do 60 s) po zatrzymaniu trafia do Groq. Rozpoznany tekst możesz poprawić i samodzielnie wysłać. Nie podawaj danych poufnych.</p><p>Ta aplikacja nie zapisuje rozmów ani nagrań w bazie lub pamięci przeglądarki. Historia znika po odświeżeniu lub kliknięciu „Nowa rozmowa”. Cloudflare Turnstile weryfikuje ruch przed wysłaniem.</p></div></details>
       </div>
     </section>
     <button class="jc-launch" type="button" aria-controls="jc-panel" aria-expanded="false">
@@ -109,7 +109,7 @@
   async function request(path, options = {}) {
     const response = await fetch(path, {
       ...options,
-      signal: AbortSignal.timeout(45000),
+      signal: AbortSignal.timeout(105000),
     });
     let data;
     try {
@@ -299,7 +299,7 @@
       say("");
     } catch (error) {
       pending.remove();
-      say(`Nie wysłano pytania. ${error.message}`);
+      say(error.name === "TimeoutError" ? "Odpowiedź trwa zbyt długo. Spróbuj ponownie lub napisz do Juliana." : `Nie wysłano pytania. ${error.message}`);
     } finally {
       setBusy(false);
       if (!panel.hidden) input.focus();
