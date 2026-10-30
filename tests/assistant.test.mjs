@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import { handle } from "../server/assistant.mjs";
 
 const env = {
-  OPENROUTER_API_KEY: "private-openrouter",
   GROQ_API_KEY: "private-groq",
   TURNSTILE_SITE_KEY: "public-site-key",
   TURNSTILE_SECRET_KEY: "private-turnstile",
@@ -153,7 +152,7 @@ test("Turnstile odrzuca fałszywy token, inną domenę i inną akcję", async ()
     403,
   );
 });
-test("zweryfikowane pytanie trafia do OpenRouter z bazą wiedzy i kluczem tylko w nagłówku", async () => {
+test("zweryfikowane pytanie trafia do Groq z bazą wiedzy i kluczem tylko w nagłówku", async () => {
   const calls = [];
   const response = await handle(
     makeRequest({
@@ -175,9 +174,9 @@ test("zweryfikowane pytanie trafia do OpenRouter z bazą wiedzy i kluczem tylko 
     answer: "Julian rozwija automatyzacje w n8n.",
   });
   const { url, options } = calls[1];
-  assert.equal(url, "https://openrouter.ai/api/v1/chat/completions");
-  assert.ok(!url.includes(env.OPENROUTER_API_KEY));
-  assert.equal(options.headers.Authorization, `Bearer ${env.OPENROUTER_API_KEY}`);
+  assert.equal(url, "https://api.groq.com/openai/v1/chat/completions");
+  assert.ok(!url.includes(env.GROQ_API_KEY));
+  assert.equal(options.headers.Authorization, `Bearer ${env.GROQ_API_KEY}`);
   const payload = JSON.parse(options.body);
   assert.match(
     payload.messages[0].content,
@@ -187,8 +186,10 @@ test("zweryfikowane pytanie trafia do OpenRouter z bazą wiedzy i kluczem tylko 
     payload.messages.map((message) => message.role),
     ["system", "user", "assistant", "user"],
   );
-  assert.equal(payload.max_tokens, 1600);
-  assert.equal(payload.model, "recursive/flint-v1.0:free");
+  assert.equal(payload.max_completion_tokens, 2048);
+  assert.equal(payload.model, "openai/gpt-oss-120b");
+  assert.equal(payload.reasoning_effort, "low");
+  assert.equal(payload.include_reasoning, false);
 });
 test("pełne sześć wymian z polskimi znakami mieści się w limicie żądania", async () => {
   const messages = Array.from({ length: 13 }, (_, index) => ({
@@ -211,13 +212,13 @@ test("błąd i blokada dostawcy nie ujawniają surowej odpowiedzi ani klucza", a
     const response = await handle(makeRequest(), env, async () =>
       ++count === 1
         ? ok(verified("chat"))
-        : new Response("private-openrouter technical provider error", { status }),
+        : new Response("private-groq technical provider error", { status }),
     );
     assert.equal(response.status, status === 429 ? 429 : 502);
-    assert.ok(!(await response.text()).includes("private-openrouter"));
+    assert.ok(!(await response.text()).includes("private-groq"));
   }
 });
-test("brak odpowiedzi i zablokowana odpowiedź OpenRouter dają czytelny błąd", async () => {
+test("brak odpowiedzi i zablokowana odpowiedź Groq dają czytelny błąd", async () => {
   for (const result of [{}, { choices: [{ finish_reason: "content_filter" }] }]) {
     let count = 0;
     assert.equal(
@@ -250,7 +251,7 @@ function audioRequest(
     body: form,
   });
 }
-test("audio trafia do Groq i wraca jako tekst bez automatycznego pytania do OpenRouter", async () => {
+test("audio trafia do Groq i wraca jako tekst bez automatycznego pytania do Groq", async () => {
   let count = 0;
   const response = await handle(audioRequest(), env, async (url, options) => {
     if (++count === 1) return ok(verified("transcribe"));
@@ -309,4 +310,33 @@ test("brak całego zdania po ucięciu nie jest prezentowany jako gotowa odpowied
   const result = { choices: [{ finish_reason: "length", message: { content: "Julian może po" } }] };
   const response = await handle(makeRequest(), env, async () => ok(++count === 1 ? verified("chat") : result));
   assert.equal(response.status, 502);
+});
+
+
+test("brak klucza Groq blokuje rozmowę bez wywołania dostawcy", async () => {
+  const response = await handle(makeRequest(), { ...env, GROQ_API_KEY: "" }, never);
+  assert.equal(response.status, 503);
+});
+test("historia dla Groq zachowuje najnowsze pytanie i całe pary w budżecie", async () => {
+  let count = 0;
+  const messages = Array.from({ length: 13 }, (_, i) => ({ role: i % 2 ? "assistant" : "user", content: String(i) + "ą".repeat(i % 2 ? 5500 : 1800) }));
+  const response = await handle(makeRequest({ ...body, messages }), env, async (url, options) => {
+    if (++count === 1) return ok(verified("chat"));
+    const sent = JSON.parse(options.body).messages.slice(1);
+    assert.deepEqual(sent, [messages.at(-1)]);
+    assert.ok(sent.reduce((n, m) => n + m.content.length, 0) <= 6000);
+    return ok(answer);
+  });
+  assert.equal(response.status, 200);
+});
+test("limit Groq nie wywołuje ponowień ani innego dostawcy", async () => {
+  let count = 0;
+  const response = await handle(makeRequest(), env, async (url) => {
+    if (++count === 1) return ok(verified("chat"));
+    assert.equal(url, "https://api.groq.com/openai/v1/chat/completions");
+    return new Response("secret provider details", { status: 429 });
+  });
+  assert.equal(response.status, 429);
+  assert.equal(count, 2);
+  assert.match((await response.json()).error, /Limit rozmów/);
 });
