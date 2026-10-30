@@ -30,7 +30,7 @@ const fail = (status, message) => {
 };
 const configured = (env) =>
   Boolean(
-    env.OPENROUTER_API_KEY && env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY,
+    env.GROQ_API_KEY && env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY,
   );
 
 async function limitedBody(request, maximum) {
@@ -132,25 +132,29 @@ async function chat(request, env, fetcher) {
   const contents = messagesFrom(body);
   await verify(request, env, body.token, "chat", fetcher);
   const response = await fetcher(
-    "https://openrouter.ai/api/v1/chat/completions",
+    "https://api.groq.com/openai/v1/chat/completions",
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "recursive/flint-v1.0:free",
-        messages: [{ role: "system", content: systemInstruction }, ...contents],
-        max_tokens: 1600,
-        temperature: 0.4,
+        model: "openai/gpt-oss-120b",
+        messages: [{ role: "system", content: systemInstruction }, ...recentMessages(contents)],
+        max_completion_tokens: 2048,
+        reasoning_effort: "low",
+        include_reasoning: false,
+        temperature: 0.5,
       }),
-      signal: AbortSignal.timeout(90000),
+      signal: AbortSignal.timeout(20000),
     },
   );
   if (!response.ok) {
+    // Wyłącznie kod stanu: bez klucza, treści rozmowy i odpowiedzi dostawcy.
+    console.error("assistant_upstream", { service: "groq_chat", status: response.status });
     if (response.status === 429)
-      fail(429, "Asystent ma teraz dużo pytań. Spróbuj za chwilę.");
+      fail(429, "Limit rozmów został chwilowo osiągnięty. Spróbuj później lub napisz do Juliana.");
     fail(
       502,
       "Nie udało się uzyskać odpowiedzi. Spróbuj ponownie lub napisz do Juliana.",
@@ -178,6 +182,16 @@ async function chat(request, env, fetcher) {
     return json({ answer: bounded.slice(0, last.index + 1) + "\n\nOdpowiedź została skrócona. Możesz dopytać o szczegóły." });
   }
   return json({ answer });
+}
+
+// Darmowy plan ma limit tokenów na minutę. Zachowaj całe pary wiadomości,
+// zamiast wysyłać nieograniczoną historię lub urywać pojedyncze wiadomości.
+function recentMessages(contents) {
+  let selected = contents.slice(-5);
+  while (selected.length > 1 && selected.reduce((n, m) => n + m.content.length, 0) > 6000) {
+    selected = selected.slice(2);
+  }
+  return selected;
 }
 
 async function transcribe(request, env, fetcher) {
@@ -264,6 +278,7 @@ export async function handle(request, env, fetcher = fetch) {
     if (error instanceof HttpError)
       return json({ error: error.message }, error.status);
     // Nie logujemy rozmów, nagrań, kluczy ani odpowiedzi dostawców.
+    console.error("assistant_failure", { operation: path === "/api/chat" ? "chat" : "transcribe", timeout: error?.name === "TimeoutError" });
     return json(
       {
         error:
@@ -273,3 +288,4 @@ export async function handle(request, env, fetcher = fetch) {
     );
   }
 }
+
