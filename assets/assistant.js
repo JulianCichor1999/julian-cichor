@@ -92,6 +92,11 @@
   function say(text) {
     status.textContent = text;
   }
+  function scrollToBottom() {
+    requestAnimationFrame(() => {
+      log.scrollTop = log.scrollHeight;
+    });
+  }
   function message(role, text) {
     const bubble = document.createElement("div");
     bubble.className = "jc-message";
@@ -100,7 +105,7 @@
     label.textContent = role === "user" ? "Ty" : "Asystent AI";
     bubble.append(label, document.createTextNode(text));
     log.append(bubble);
-    log.scrollTop = log.scrollHeight;
+    scrollToBottom();
     return bubble;
   }
   function welcome() {
@@ -317,6 +322,7 @@
     try {
       const token = await getToken("chat");
       say("Asystent przygotowuje odpowiedź…");
+      scrollToBottom();
       const messages = [
         ...history.slice(-4),
         { role: "user", content: question },
@@ -337,6 +343,7 @@
     } finally {
       setBusy(false);
       if (!panel.hidden) input.focus();
+      scrollToBottom();
     }
   });
 
