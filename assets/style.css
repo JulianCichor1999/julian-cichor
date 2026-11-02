@@ -184,6 +184,50 @@ h1 span {
 .primary:hover {
   background: #0055aa;
 }
+.assistant-invite[hidden] {
+  display: none;
+}
+.assistant-invite {
+  max-width: 800px;
+  margin: 26px auto 0;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  text-align: left;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.assistant-invite-copy strong,
+.assistant-invite-copy span {
+  display: block;
+}
+.assistant-invite-copy strong {
+  margin-bottom: 4px;
+  font-size: 17px;
+}
+.assistant-invite-copy span {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.assistant-invite-button {
+  flex-shrink: 0;
+  border: 0;
+  cursor: pointer;
+  font-size: 15px;
+}
+@media (max-width: 650px) {
+  .assistant-invite {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .assistant-invite-button {
+    max-width: 100%;
+  }
+}
 .text-link {
   color: var(--blue);
   display: inline-flex;

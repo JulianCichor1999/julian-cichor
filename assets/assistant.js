@@ -29,9 +29,13 @@
         <details><summary>Jak działa rozmowa?</summary><div class="jc-privacy-copy" id="jc-help"><p>Odpowiada AI na podstawie informacji o Julianie. Może się pomylić. Zakres i wycenę potwierdza Julian.</p><p>Wiadomości i maksymalnie 2 ostatnie wymiany trafiają przez Cloudflare do Groq. Nagranie (do 60 s) po zatrzymaniu również trafia do Groq. Rozpoznany tekst możesz poprawić i samodzielnie wysłać. Nie podawaj danych osobowych ani poufnych.</p><p>Ta aplikacja nie zapisuje rozmów ani nagrań w bazie lub pamięci przeglądarki. Historia znika po odświeżeniu lub kliknięciu „Nowa rozmowa”. Dostawcy przetwarzają dane według własnych zasad. Cloudflare Turnstile weryfikuje ruch przed wysłaniem.</p></div></details>
       </div>
     </section>
+    <div class="jc-tip" hidden>
+      <button class="jc-tip-close" type="button" aria-label="Zamknij powitanie asystenta">×</button>
+      <strong>Masz pytanie?</strong>Porozmawiajmy o AI, automatyzacji i marketingu.
+    </div>
     <button class="jc-launch" type="button" aria-controls="jc-panel" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-1 2V11.5a9 9 0 0 1 18 0Z"/><path d="M8 10h8M8 14h5"/></svg>
-      <span>Zapytaj asystenta</span>
+      <span>W czym mogę pomóc?</span>
     </button>`;
   document.body.append(root);
   const $ = (selector) => root.querySelector(selector);
@@ -43,6 +47,23 @@
     send = $(".jc-send");
   const mic = $(".jc-mic"),
     clear = $(".jc-clear");
+  const invite = document.querySelector(".assistant-invite");
+  const inviteButton = invite?.querySelector(".assistant-invite-button");
+  const tip = $(".jc-tip");
+  let opener = launch;
+  if (invite && inviteButton) invite.hidden = false;
+  try {
+    if (!sessionStorage.getItem("jc-assistant-tip-seen")) {
+      tip.hidden = false;
+      sessionStorage.setItem("jc-assistant-tip-seen", "1");
+    }
+  } catch {
+    // Brak dostępu do pamięci przeglądarki nie blokuje korzystania z czatu.
+  }
+  $(".jc-tip-close").addEventListener("click", () => {
+    tip.hidden = true;
+    launch.focus();
+  });
   let config,
     loadingConfig,
     busy = false,
@@ -154,20 +175,30 @@
   function close() {
     panel.hidden = true;
     launch.setAttribute("aria-expanded", "false");
+    inviteButton?.setAttribute("aria-expanded", "false");
     cancelToken?.();
     if (recorder?.state === "recording") {
       discardRecording = true;
       recorder.stop();
     }
-    launch.focus();
+    opener.focus();
   }
-  launch.addEventListener("click", () => {
-    if (!panel.hidden) return close();
+  function openAssistant(source) {
+    if (!panel.hidden) {
+      if (source === launch) close();
+      else input.focus();
+      return;
+    }
+    opener = source;
+    tip.hidden = true;
     panel.hidden = false;
     launch.setAttribute("aria-expanded", "true");
+    inviteButton?.setAttribute("aria-expanded", "true");
     input.focus();
     loadConfig();
-  });
+  }
+  launch.addEventListener("click", () => openAssistant(launch));
+  inviteButton?.addEventListener("click", () => openAssistant(inviteButton));
   $(".jc-close").addEventListener("click", close);
   root.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !panel.hidden) {

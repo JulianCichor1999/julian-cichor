@@ -46,6 +46,40 @@
   box-shadow: var(--chat-shadow);
   font-weight: 600;
 }
+.jc-assistant .jc-tip {
+  position: absolute;
+  right: 0;
+  bottom: 68px;
+  width: min(270px, calc(100vw - 2 * var(--chat-edge)));
+  padding: 14px 48px 14px 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--chat-radius);
+  box-shadow: var(--chat-shadow);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.jc-assistant .jc-tip strong {
+  display: block;
+  margin-bottom: 4px;
+}
+.jc-assistant .jc-tip-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 21px;
+}
+@media (max-width: 650px) {
+  .jc-assistant .jc-tip {
+    display: none;
+  }
+}
 .jc-assistant svg {
   flex-shrink: 0;
   width: 20px;
