@@ -82,7 +82,7 @@
     clear.disabled = busy;
     mic.disabled = busy && recorder?.state !== "recording";
     root.querySelectorAll(".jc-starters button").forEach((button) => {
-      button.disabled = busy;
+      button.disabled = busy || !config?.enabled;
     });
   }
   function setBusy(value) {
@@ -121,7 +121,7 @@
       button.textContent = text;
       button.addEventListener("click", () => {
         input.value = text;
-        input.focus();
+        $(".jc-form").requestSubmit();
       });
       starters.append(button);
     }
@@ -304,13 +304,15 @@
   $(".jc-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     if (busy || !config?.enabled) return;
-    const question = input.value.trim();
+    const original = input.value;
+    const question = original.trim();
     if (!question) {
       input.focus();
       return say("Wpisz pytanie lub skorzystaj z dyktowania.");
     }
     if (question.length > 2000) return say("Skróć pytanie do 2000 znaków.");
     setBusy(true);
+    input.value = "";
     const pending = message("user", question);
     try {
       const token = await getToken("chat");
@@ -327,10 +329,10 @@
       history = [...messages, { role: "assistant", content: data.answer }];
       message("assistant", data.answer);
       $(".jc-starters")?.remove();
-      input.value = "";
       say("");
     } catch (error) {
       pending.remove();
+      input.value = original;
       say(error.name === "TimeoutError" ? "Odpowiedź trwa zbyt długo. Spróbuj ponownie lub napisz do Juliana." : `Nie wysłano pytania. ${error.message}`);
     } finally {
       setBusy(false);
@@ -441,5 +443,6 @@
     cancelToken?.();
   });
   welcome();
+  controls();
 })();
 
